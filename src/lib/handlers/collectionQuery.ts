@@ -11,6 +11,7 @@ const query = `#graphql
             variants(first: 25) {
               edges {
                 node {
+                  id
                   sku
                   buyXGetY: metafield(namespace: "debut", key: "enable_b2g1f") {
                     id

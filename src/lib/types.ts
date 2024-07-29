@@ -5,6 +5,7 @@ type BuyXGetYEnabled = null | {
 
 type CollectionVariant = {
   node: {
+    id: string;
     sku: string;
     buyXGetY: BuyXGetYEnabled;
   };
@@ -105,6 +106,25 @@ export type DiscountResponse = {
           };
         };
       };
+    };
+  };
+};
+
+export type MetafieldsSetResponse = {
+  data: {
+    metafieldsSet: {
+      metafields: {
+        key: string;
+        namespace: string;
+        value: string;
+        createdAt: string;
+        updatedAt: string;
+      }[];
+      userErrors: {
+        field: string;
+        message: string;
+        code: string;
+      }[];
     };
   };
 };

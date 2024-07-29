@@ -1,7 +1,8 @@
 import { shopifyAuthenticatedFetch } from './lib/utils';
 import discountQuery from './lib/handlers/discountQuery';
 import collectionQuery from './lib/handlers/collectionQuery';
-import type { CollectionResponse, DiscountResponse } from './lib/types';
+import setMetafieldMutation from './lib/handlers/setMetafieldMutation';
+import type { CollectionResponse, DiscountResponse, MetafieldsSetResponse } from './lib/types';
 
 const COLLECTION_HANDLE = 'demo';
 const DISCOUNT_ID = 'gid://shopify/DiscountAutomaticNode/1166449606739';
@@ -21,26 +22,26 @@ async function getDiscountedItems() {
     const customerBuysVariants = response.data.discountNode.discount.customerBuys.items.productVariants.edges;
     const customerGetsVariants = response.data.discountNode.discount.customerGets.items.productVariants.edges;
 
-    let buyProducts = [];
+    const buyProducts = [];
     customerBuysProducts.forEach((product) => {
       product.node.variants.edges.forEach((variant) => {
         buyProducts.push(variant.node.sku);
       });
     });
 
-    let getProducts = [];
+    const getProducts = [];
     customerGetsProducts.forEach((product) => {
       product.node.variants.edges.forEach((variant) => {
         getProducts.push(variant.node.sku);
       });
     });
 
-    let buyVariants = [];
+    const buyVariants = [];
     customerBuysVariants.forEach((variant) => {
       buyVariants.push(variant.node.sku);
     });
 
-    let getVariants = [];
+    const getVariants = [];
     customerGetsVariants.forEach((variant) => {
       getVariants.push(variant.node.sku);
     });
@@ -74,7 +75,7 @@ async function getCollectionItems() {
 
     const products = response.data.collectionByHandle.products.edges;
 
-    let items = [];
+    const items = [];
     let count = 0;
     products.forEach((product) => {
       product.node.variants.edges.forEach((variant) => {
@@ -92,6 +93,39 @@ async function getCollectionItems() {
   } catch (err: any) {
     console.log('Error getting collection items', err.message);
     return [];
+  }
+}
+
+async function setMetafield(id: string) {
+  // set metafield
+  try {
+    console.log('-----------------------------------------------');
+    console.log('Setting Metafield for', id);
+    const response = await shopifyAuthenticatedFetch<MetafieldsSetResponse>(setMetafieldMutation, {
+      metafields: [
+        {
+          key: 'enable_buy_x_get_y',
+          namespace: 'suavecito',
+          ownerId: id,
+          type: 'boolean',
+          value: 'true',
+        },
+      ],
+    });
+
+    console.log('Response:', response);
+
+    if (response.data.metafieldsSet.userErrors.length > 0) {
+      console.log('Error setting metafield', response.data.metafieldsSet.userErrors);
+      return false;
+    }
+
+    console.log('Metafield set successfully', response.data.metafieldsSet.metafields.length);
+
+    return true;
+  } catch (err: any) {
+    console.log('Error setting metafield', err.message);
+    return false;
   }
 }
 
