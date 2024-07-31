@@ -136,7 +136,7 @@ async function main() {
   const discountedItems = await getDiscountedItems();
   if (discountedItems.length === 0) {
     console.log(
-      'No discounted items found. This could be an incorrect discount type. Discount type needs to be Automatic Buy X Get Y/',
+      'No discounted items found. This could be an incorrect discount type. Discount type needs to be Automatic Buy X Get Y.',
     );
     return;
   }
