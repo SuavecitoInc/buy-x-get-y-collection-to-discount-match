@@ -58,6 +58,14 @@ async function getDiscountedItems() {
     const commonItems = buyItems.filter((item) => getItems.includes(item));
 
     console.log('Common Items:', commonItems.length);
+
+    // get difference
+    const difference =
+      buyItems.length > getItems.length
+        ? buyItems.filter((item) => !getItems.includes(item))
+        : getItems.filter((item) => !buyItems.includes(item));
+    console.log('Difference:', difference.length);
+    difference.forEach((item) => console.log(' - ', item));
     console.log('-----------------------------------------------');
     return buyItems;
   } catch (err: any) {
@@ -141,26 +149,32 @@ async function main() {
     return;
   }
 
-  console.log('Discounted Items:', discountedItems.length);
+  console.log('Total Discounted Items:', discountedItems.length);
 
   const collectionItems = await getCollectionItems();
   if (collectionItems.length === 0) {
     console.log('No collection items found. This could mean the collection is empty or the metafield is not set.');
     return;
   }
-  console.log('Collection Items:', collectionItems.length);
+
+  console.log('-----------------------------------------------');
+  console.log('Discounted Variants:', discountedItems.length);
+  console.log('Collection Variants:', collectionItems.length);
 
   const commonItems = collectionItems.filter((item) => discountedItems.includes(item));
 
-  console.log('Common Items:', commonItems.length);
+  console.log('Common Variants:', commonItems.length);
 
   // get difference
-  const difference = collectionItems.filter((item) => !discountedItems.includes(item));
+  const difference =
+    collectionItems.length > discountedItems.length
+      ? collectionItems.filter((item) => !discountedItems.includes(item))
+      : discountedItems.filter((item) => !collectionItems.includes(item));
 
   console.log('Difference:', difference.length);
 
   // get items in collection but not in discount
-  difference.forEach((item) => console.log(item));
+  difference.forEach((item) => console.log(' -', item));
   console.log('-----------------------------------------------');
 }
 
