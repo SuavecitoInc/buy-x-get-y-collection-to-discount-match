@@ -1,12 +1,14 @@
 {
   "name": "buy-x-get-y",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "lint": "eslint src/**/*.ts",
     "format": "eslint src/**/*.ts --fix",
-    "dev": "tsx src/index.ts"
+    "match": "tsx src/index.ts",
+    "dev": "tsx src/index.ts",
+    "generate": "graphql-codegen --config .graphqlrc.ts"
   },
   "author": "j-Riv <jriv@suavecito.com>",
   "license": "ISC",
@@ -22,6 +24,9 @@
     "typescript": "^5.4.3"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.2",
+    "@shopify/api-codegen-preset": "^1.0.1",
+    "@shopify/graphql-codegen": "^0.1.0",
     "@types/node": "^20.12.3",
     "@typescript-eslint/eslint-plugin": "^7.5.0",
     "@typescript-eslint/parser": "^7.5.0",

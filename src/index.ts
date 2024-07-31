@@ -1,10 +1,8 @@
 import { shopifyAuthenticatedFetch } from './lib/utils';
-import discountQuery from './lib/handlers/discountQuery';
-import collectionQuery from './lib/handlers/collectionQuery';
-import setMetafieldMutation from './lib/handlers/setMetafieldMutation';
-import type { CollectionResponse, DiscountResponse, MetafieldsSetResponse } from './lib/types';
+import { metafieldsSet, collectionByHandle, discountNode } from './lib/handlers';
+import type { MetafieldsSetMutation, CollectionByHandleQuery, DiscountNodeQuery } from './lib/types/admin.generated';
 
-const COLLECTION_HANDLE = 'demo';
+const COLLECTION_HANDLE = 'buy-2-get-1-free'; // demo
 const DISCOUNT_ID = 'gid://shopify/DiscountAutomaticNode/1166449606739';
 
 async function getDiscountedItems() {
@@ -13,35 +11,40 @@ async function getDiscountedItems() {
     console.log('Fetching Discounted Items');
     const id = DISCOUNT_ID;
     console.log('Discount ID:', id);
-    const response = await shopifyAuthenticatedFetch<DiscountResponse>(discountQuery, {
+    const response = await shopifyAuthenticatedFetch<DiscountNodeQuery>(discountNode, {
       id,
     });
 
+    // we only care about Automatic Buy X Get Y discounts
+    if (response.data.discountNode.discount.type !== 'DiscountAutomaticBxgy') {
+      console.log('Discount is not Buy X Get Y');
+      return [];
+    }
     const customerBuysProducts = response.data.discountNode.discount.customerBuys.items.products.edges;
     const customerGetsProducts = response.data.discountNode.discount.customerGets.items.products.edges;
     const customerBuysVariants = response.data.discountNode.discount.customerBuys.items.productVariants.edges;
     const customerGetsVariants = response.data.discountNode.discount.customerGets.items.productVariants.edges;
 
-    const buyProducts = [];
+    const buyProducts: string[] = [];
     customerBuysProducts.forEach((product) => {
       product.node.variants.edges.forEach((variant) => {
         buyProducts.push(variant.node.sku);
       });
     });
 
-    const getProducts = [];
+    const getProducts: string[] = [];
     customerGetsProducts.forEach((product) => {
       product.node.variants.edges.forEach((variant) => {
         getProducts.push(variant.node.sku);
       });
     });
 
-    const buyVariants = [];
+    const buyVariants: string[] = [];
     customerBuysVariants.forEach((variant) => {
       buyVariants.push(variant.node.sku);
     });
 
-    const getVariants = [];
+    const getVariants: string[] = [];
     customerGetsVariants.forEach((variant) => {
       getVariants.push(variant.node.sku);
     });
@@ -69,13 +72,13 @@ async function getCollectionItems() {
     console.log('Fetching Collection Items');
     const handle = COLLECTION_HANDLE;
     console.log('Collection Handle:', handle);
-    const response = await shopifyAuthenticatedFetch<CollectionResponse>(collectionQuery, {
+    const response = await shopifyAuthenticatedFetch<CollectionByHandleQuery>(collectionByHandle, {
       handle,
     });
 
     const products = response.data.collectionByHandle.products.edges;
 
-    const items = [];
+    const items: string[] = [];
     let count = 0;
     products.forEach((product) => {
       product.node.variants.edges.forEach((variant) => {
@@ -101,7 +104,7 @@ async function setMetafield(id: string) {
   try {
     console.log('-----------------------------------------------');
     console.log('Setting Metafield for', id);
-    const response = await shopifyAuthenticatedFetch<MetafieldsSetResponse>(setMetafieldMutation, {
+    const response = await shopifyAuthenticatedFetch<MetafieldsSetMutation>(metafieldsSet, {
       metafields: [
         {
           key: 'enable_buy_x_get_y',
@@ -131,9 +134,20 @@ async function setMetafield(id: string) {
 
 async function main() {
   const discountedItems = await getDiscountedItems();
+  if (discountedItems.length === 0) {
+    console.log(
+      'No discounted items found. This could be an incorrect discount type. Discount type needs to be Automatic Buy X Get Y/',
+    );
+    return;
+  }
+
   console.log('Discounted Items:', discountedItems.length);
 
   const collectionItems = await getCollectionItems();
+  if (collectionItems.length === 0) {
+    console.log('No collection items found. This could mean the collection is empty or the metafield is not set.');
+    return;
+  }
   console.log('Collection Items:', collectionItems.length);
 
   const commonItems = collectionItems.filter((item) => discountedItems.includes(item));

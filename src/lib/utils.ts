@@ -1,7 +1,12 @@
 import fetch from 'node-fetch';
 import { STORE, API_VERSION, ACCESS_TOKEN } from './const';
 
-export async function shopifyAuthenticatedFetch<T>(query: string, variables?: object): Promise<T> {
+type JsonResponse<T> = {
+  data: T;
+  error?: any;
+};
+
+export async function shopifyAuthenticatedFetch<T>(query: string, variables?: object): Promise<JsonResponse<T>> {
   try {
     const endpoint = `https://${STORE}.myshopify.com/admin/api/${API_VERSION}/graphql.json`;
     const response = await fetch(endpoint, {
@@ -15,7 +20,7 @@ export async function shopifyAuthenticatedFetch<T>(query: string, variables?: ob
 
     const json = await response.json();
 
-    return json as T;
+    return json as JsonResponse<T>;
   } catch (error: any) {
     console.log(error);
   }

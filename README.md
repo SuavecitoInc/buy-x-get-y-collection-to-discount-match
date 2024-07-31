@@ -15,8 +15,14 @@ const COLLECTION_HANDLE = 'demo';
 const DISCOUNT_ID = 'gid://shopify/DiscountAutomaticNode/1166449606739';
 ```
 
+### Generate Types
+
+```bash
+npm run generate
+```
+
 ### Run
 
 ```bash
-npm run dev
+npm run match
 ```
