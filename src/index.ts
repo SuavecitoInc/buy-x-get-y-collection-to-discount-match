@@ -20,10 +20,14 @@ async function getDiscountedItems() {
       console.log('Discount is not Buy X Get Y');
       return [];
     }
-    const customerBuysProducts = response.data.discountNode.discount.customerBuys.items.products.edges;
-    const customerGetsProducts = response.data.discountNode.discount.customerGets.items.products.edges;
-    const customerBuysVariants = response.data.discountNode.discount.customerBuys.items.productVariants.edges;
-    const customerGetsVariants = response.data.discountNode.discount.customerGets.items.productVariants.edges;
+
+    const { discount } = response.data.discountNode;
+    const { customerBuys, customerGets } = discount;
+
+    const customerBuysProducts = customerBuys.items.products.edges;
+    const customerGetsProducts = customerGets.items.products.edges;
+    const customerBuysVariants = customerBuys.items.productVariants.edges;
+    const customerGetsVariants = customerGets.items.productVariants.edges;
 
     const buyProducts: string[] = [];
     customerBuysProducts.forEach((product) => {
